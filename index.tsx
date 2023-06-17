@@ -1,22 +1,13 @@
 import ReactDOM from 'react-dom'
-import View from './src/View'
-import controller from './src/Controller'
-import { InstallProps, ActionHandleResultType, IViewElementProps } from './Interface'
-
-let onReceiveActHandleRes: ((data: ActionHandleResultType) => void) | undefined | null
-
-export let gid: string
+import App from './src/App'
 
 export default {
 
-  bootstrap: async (props: InstallProps) => {
-    gid = props.gid
-    onReceiveActHandleRes = props.onReceiveActionHandleResult
+  bootstrap: async (props: any) => {
     return Promise.resolve()
   },
 
   unmount: async (props: any) => {
-    onReceiveActHandleRes = undefined
     ReactDOM.unmountComponentAtNode(props.container)
   },
 
@@ -24,38 +15,17 @@ export default {
     props.onGlobalStateChange((event: { category: string, params: any }, prevEvent: any) => { // event: 变更后的状态; prevEvent 变更前的状态
       switch (event.category) {
         case 'ACTION':
-          controller.handleAction(event.params).then(res => onReceiveActHandleRes?.(res)).catch(err => console.error(err))
           break
         case 'FEEDBACK':
-          controller.handleFeedback(event.params)
           break
       }
     })
 
-    ReactDOM.render(<div />, props.container)
+    ReactDOM.render(<App />, props.container)
   },
+}
 
-  update: async (props: IViewElementProps): Promise<any> => {
-    const { isReadonly, containerId, viewType, data, expectation } = props
-    ReactDOM.render(
-      <View
-        containerId={containerId}
-        isReadonly={isReadonly}
-        viewType={viewType}
-        data={data}
-        expectation={expectation}
-        onSendAction={(actionInfo) => {
-          if (!actionInfo.expectation) {
-            actionInfo.expectation = expectation
-          }
-          controller.handleAction(actionInfo).then(res => onReceiveActHandleRes?.(res)).catch(err => console.error(err))
-        }}
-      />
-      ,
-      document.getElementById(containerId),
-    )
-
-    return Promise.resolve()
-  },
-
+// @ts-ignore
+if (!window.__POWERED_BY_QIANKUN__) {
+  ReactDOM.render(<App />, document.getElementById("root"))
 }

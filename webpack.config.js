@@ -7,12 +7,12 @@ module.exports = {
   entry: './index.tsx',
   mode: 'production',
   output: {
-    path: path.resolve(__dirname, 'dist'),
-    filename: 'gadget.js',
+    path: path.resolve(__dirname, 'build'),
+    filename: 'settings.js',
     libraryTarget: 'umd',
     umdNamedDefine: true,
     libraryExport: 'default',
-    library: `${pkgInfo.name}-[name]`,
+    library: pkgInfo.name,
     chunkLoadingGlobal: '',
   },
   devServer: {},
@@ -46,18 +46,6 @@ module.exports = {
   plugins: [
     new HtmlWebpackPlugin({
       title: pkgInfo.name,
-      meta: {
-        id: pkgInfo.id,
-        name: pkgInfo.name,
-        icon: pkgInfo.icon,
-        version: pkgInfo.version,
-        description: pkgInfo.description,
-        homepage: pkgInfo.homepage,
-        author: pkgInfo.author,
-        keywords: pkgInfo.keywords,
-        email: pkgInfo.bugs.email,
-        bugReport: pkgInfo.bugs.url
-      },
       filename: 'index.html',
       template: 'index.html',
     })

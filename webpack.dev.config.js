@@ -3,7 +3,6 @@ const config = require('./webpack.config')
 const pkgInfo = require('./package.json')
 
 config.mode = 'development'
-config.output.library = 'DebugGadget'
 config.output.chunkLoadingGlobal = `webpackJsonp_${pkgInfo.name}`
 
 config.devServer = {
@@ -14,7 +13,7 @@ config.devServer = {
     'Access-Control-Allow-Headers': '*'
   },
   port: 7031,
-  static: './dist',
+  static: './build',
 }
 
 module.exports = config
