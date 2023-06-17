@@ -18,7 +18,6 @@ export default () => {
   const [userName, setUserName] = React.useState<string | undefined>()
 
   useEffect(() => {
-    // accessToken = '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'
     if (!accessToken) {
       return
     }
