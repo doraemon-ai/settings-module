@@ -1,54 +1,70 @@
-import { Avatar, Button, List, Typography, Skeleton } from 'antd'
+import { Avatar, Button, List, Typography } from 'antd'
 import {
   GithubFilled,
 } from '@ant-design/icons'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 
-const { Title, Paragraph, Text, Link } = Typography
+const { Paragraph, Text } = Typography
 
-const KEY_TOKEN = 'doraemon_access_token'
 const KEY_NAME = 'doraemon_user_name'
 const KEY_AVATAR = 'doraemon_user_avatar'
 
 export default () => {
-  let accessToken = localStorage.getItem(KEY_TOKEN)
 
-  const [avatarUrl, setAvatarUrl] = React.useState<string | undefined>()
-  const [userName, setUserName] = React.useState<string | undefined>()
+  const [loginLoading, setLoginLoading] = useState<boolean>(false)
+
+  const [userInfo, setUserInfo] = useState<{
+    name?: string | null,
+    avatar?: string | null
+  }>({
+    name: localStorage.getItem(KEY_NAME),
+    avatar: localStorage.getItem(KEY_AVATAR),
+  })
 
   useEffect(() => {
-    if (!accessToken) {
-      return
+    const broadcast = new BroadcastChannel('Doraemon')
+
+    broadcast.onmessage = e => {
+      const data = e.data
+      if (data.category === 'callback') {
+        console.log('[BroadcastChannel] receive data:', data)
+
+        const queries = new URLSearchParams(data.queryStr)
+        const accessToken = queries.get('access_token')
+
+        axios
+          .get(
+            'https://api.github.com/user',
+            { headers: { Authorization: 'Bearer ' + accessToken } },
+          )
+          .then(res => {
+            const { avatar_url, name } = res.data
+            setUserInfo({
+              name,
+              avatar: avatar_url,
+            })
+
+            localStorage.setItem(KEY_NAME, name)
+            localStorage.setItem(KEY_AVATAR, avatar_url)
+            setLoginLoading(false)
+          })
+      }
     }
-
-    axios.get('https://api.github.com/user',
-      { headers: { Authorization: 'Bearer ' + accessToken } },
-    ).then(res => {
-      const { avatar_url, name } = res.data
-      setAvatarUrl(avatar_url)
-
-      localStorage.setItem(KEY_NAME, name)
-      localStorage.setItem(KEY_AVATAR, avatar_url)
-
-      setUserName(name)
-    })
   }, [])
 
   const doLogin = () => {
-    window.location.replace('https://github.com/login/oauth/authorize?client_id=59e7a16e191e4d506e53')
+    setLoginLoading(true)
+
+    const loginUrl = 'https://github.com/login/oauth/authorize?client_id=59e7a16e191e4d506e53'
+    window.open(loginUrl, 'Github登录', 'height=700,width=800,top=0,left=0,toolbar=no,menubar=no,scrollbars=no,resizable=no,location=no,status=no')
   }
 
   const doLogout = () => {
-    localStorage.removeItem(KEY_TOKEN)
     localStorage.removeItem(KEY_NAME)
     localStorage.removeItem(KEY_AVATAR)
 
     window.location.replace(window.location.origin)
-  }
-
-  if (accessToken && !userName) {
-    return <Skeleton avatar paragraph={{ rows: 4 }}></Skeleton>
   }
 
   return <div>
@@ -56,9 +72,9 @@ export default () => {
       <List.Item
         actions={
           [
-            accessToken ?
-              <Button type={'dashed'} key="list-logout" onClick={doLogout}>登出</Button> :
-              <Button type={'primary'} key="list-login" onClick={doLogin}>登录</Button>,
+            userInfo.name ?
+              <Button key="list-logout" danger onClick={doLogout}>登出</Button> :
+              <Button type={'primary'} key="list-login" loading={loginLoading} onClick={doLogin}>登录</Button>,
           ]
         }
       >
@@ -69,16 +85,12 @@ export default () => {
               icon={
                 <GithubFilled onClick={doLogin} />
               }
-              src={avatarUrl}
+              src={userInfo.avatar}
             />
           }
-          title={userName ?? '未登录'}
+          title={userInfo.name ?? '未登录'}
           description={'获取github的账号名和头像，获取后会通过localStorage存储'} />
         <div>
-          <ul>
-            <Paragraph>用户Token（localStorage key）：<Text code>{KEY_TOKEN}</Text></Paragraph>
-          </ul>
-
           <ul>
             <Paragraph>名字（localStorage key）：<Text code>{KEY_NAME}</Text></Paragraph>
           </ul>
