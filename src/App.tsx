@@ -30,7 +30,7 @@ export default () => {
       if (data.category === 'callback') {
         console.log('[BroadcastChannel] receive data:', data)
 
-        const queries = new URLSearchParams(data.queryStr)
+        const queries = new URLSearchParams(data.queriesString)
         const accessToken = queries.get('access_token')
 
         axios
