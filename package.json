@@ -1,7 +1,7 @@
 {
   "name": "doraemon-settings",
   "version": "0.0.1",
-  "description": "这是一个示例设置页面，可以用来设置用户头像、名称等信息",
+  "description": "这是一个示例设置页面，通过登录Github来设置用户的头像、名称",
   "homepage": "https://github.com/doraemon-ai/settings-module",
   "keywords": [
     "settings"
@@ -10,7 +10,7 @@
   "license": "MIT",
   "main": "index.ts",
   "scripts": {
-    "build": "npx webpack",
+    "build": "webpack",
     "dev": "webpack-dev-server --config webpack.dev.config.js --open --progress"
   },
   "dependencies": {
