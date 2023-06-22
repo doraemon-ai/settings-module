@@ -1,7 +1,5 @@
-import { Avatar, Button, List, Typography } from 'antd'
-import {
-  GithubFilled,
-} from '@ant-design/icons'
+import { Avatar, Button, List, Typography, Modal, Spin } from 'antd'
+import { GithubFilled } from '@ant-design/icons'
 import axios from 'axios'
 import React, { useEffect, useState } from 'react'
 
@@ -30,6 +28,8 @@ export default () => {
       if (data.category === 'callback') {
         console.log('[BroadcastChannel] receive data:', data)
 
+        setLoginLoading(false)
+
         const queries = new URLSearchParams(data.queriesString)
         const accessToken = queries.get('access_token')
 
@@ -47,7 +47,6 @@ export default () => {
 
             localStorage.setItem(KEY_NAME, name)
             localStorage.setItem(KEY_AVATAR, avatar_url)
-            setLoginLoading(false)
           })
       }
     }
@@ -68,13 +67,30 @@ export default () => {
   }
 
   return <div>
+    <Modal
+      open={loginLoading}
+      title="授权登录中，请稍后..."
+      closable={false}
+      destroyOnClose={true}
+      cancelText={'取消'}
+      okText={'关闭'}
+      footer={[
+        <Button type={'primary'} onClick={() => setLoginLoading(false)}>关闭</Button>,
+      ]}
+    >
+      <div>登录完成会自动关闭，若有异常可重试。</div>
+      <Spin spinning>
+        <div style={{ height: 50 }} />
+      </Spin>
+    </Modal>
+
     <List>
       <List.Item
         actions={
           [
             userInfo.name ?
               <Button key="list-logout" danger onClick={doLogout}>登出</Button> :
-              <Button type={'primary'} key="list-login" loading={loginLoading} onClick={doLogin}>登录</Button>,
+              <Button key="list-login" type={'primary'} onClick={doLogin}>登录</Button>,
           ]
         }
       >
@@ -92,11 +108,10 @@ export default () => {
           description={'获取github的账号名和头像，获取后会通过localStorage存储'} />
         <div>
           <ul>
-            <Paragraph>名字（localStorage key）：<Text code>{KEY_NAME}</Text></Paragraph>
+            <Paragraph>名字（localStorage key）:<Text code>{KEY_NAME}</Text></Paragraph>
           </ul>
-
           <ul>
-            <Paragraph>头像（localStorage key）：<Text code>{KEY_AVATAR}</Text></Paragraph>
+            <Paragraph>头像（localStorage key）:<Text code>{KEY_AVATAR}</Text></Paragraph>
           </ul>
         </div>
       </List.Item>
